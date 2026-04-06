@@ -75,10 +75,12 @@ gcloud builds submit --no-source \
   --config manifests/cloudbuild-push-image.yaml
 ```
 
-Then update the `image` field in both manifest files — replace `REPLACE_WITH_YOUR_AR_IMAGE` with:
+Then update the `image` field in both manifest files using `sed`:
 
-```
-us-central1-docker.pkg.dev/${PROJECT_ID}/lab-streaming/pytorch-test:latest
+```bash
+sed -i "s|REPLACE_WITH_YOUR_AR_IMAGE|${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/pytorch-test:latest|g" \
+  manifests/test-pods-no-streaming.yaml \
+  manifests/test-pods-streaming.yaml
 ```
 
 ## Step 3 — Create a cluster without streaming (baseline)
