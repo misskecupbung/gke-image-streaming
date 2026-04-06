@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-streaming
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: test-streaming
+  template:
+    metadata:
+      labels:
+        app: test-streaming
+    spec:
+      containers:
+      - name: app
+        # Same image as test-pods-no-streaming.yaml.
+        # The difference is that this runs AFTER the node pool has image streaming enabled.
+        # The node-level feature (not a pod annotation) handles the streaming.
+        image: REPLACE_WITH_YOUR_AR_IMAGE
+        command: ["sleep", "3600"]
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"

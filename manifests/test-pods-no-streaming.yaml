@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-no-streaming
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: test-no-streaming
+  template:
+    metadata:
+      labels:
+        app: test-no-streaming
+    spec:
+      # Schedule on the standard node pool only
+      # (no streaming annotation, no node selector needed — streaming is a node-level feature)
+      containers:
+      - name: app
+        # Replace with your Artifact Registry image path
+        # e.g. us-central1-docker.pkg.dev/MY_PROJECT/lab-streaming/datascience-test:latest
+        image: REPLACE_WITH_YOUR_AR_IMAGE
+        command: ["sleep", "3600"]
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
