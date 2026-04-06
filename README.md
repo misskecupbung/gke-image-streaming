@@ -22,7 +22,8 @@ Hard requirement: images must be in **Artifact Registry**. Docker Hub, GCR, ECR 
 ```bash
 gcloud services enable \
   container.googleapis.com \
-  artifactregistry.googleapis.com
+  artifactregistry.googleapis.com \
+  cloudbuild.googleapis.com
 ```
 
 ## Set variables
@@ -56,7 +57,17 @@ gcloud auth configure-docker ${REGION}-docker.pkg.dev
 
 ## Step 2 — Push a large test image
 
-Pull PyTorch from Docker Hub (~6 GB) and push to AR. Cloud Shell has a 5 GB home directory, so use Cloud Build to avoid running out of space. The config is already in `manifests/cloudbuild-push-image.yaml`:
+We use Cloud Build to pull from Docker Hub (~6 GB) and push to AR. First, grant the Cloud Build service account access to Storage:
+
+```bash
+PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format='value(projectNumber)')
+
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
+  --role="roles/storage.objectAdmin"
+```
+
+Then submit the build. The config is already in `manifests/cloudbuild-push-image.yaml`:
 
 ```bash
 gcloud builds submit --no-source \
@@ -67,7 +78,7 @@ gcloud builds submit --no-source \
 Then update the `image` field in both manifest files — replace `REPLACE_WITH_YOUR_AR_IMAGE` with:
 
 ```
-${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/pytorch-test:latest
+us-central1-docker.pkg.dev/${PROJECT_ID}/lab-streaming/pytorch-test:latest
 ```
 
 ## Step 3 — Create a cluster without streaming (baseline)
