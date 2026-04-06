@@ -12,14 +12,6 @@ Hard requirement: images must be in **Artifact Registry**. Docker Hub, GCR, ECR 
 - Measuring container startup time with and without streaming
 - Testing on cold nodes where the difference is largest
 
-## Duration
-
-45–60 minutes
-
-## Cost
-
-~$0.10–$0.30. Clean up within 1 hour.
-
 ## Prerequisites
 
 - `gcloud` CLI authenticated
@@ -33,8 +25,6 @@ gcloud services enable \
   artifactregistry.googleapis.com
 ```
 
----
-
 ## Set variables
 
 ```bash
@@ -45,16 +35,12 @@ export REPO=lab-streaming
 export CLUSTER_NAME=lab-image-streaming
 ```
 
----
-
 ## Clone the repo
 
 ```bash
 git clone https://github.com/misskecupbung/gke-image-streaming.git
 cd gke-image-streaming
 ```
-
----
 
 ## Step 1 — Create an Artifact Registry repository
 
@@ -67,8 +53,6 @@ gcloud artifacts repositories create $REPO \
 gcloud auth configure-docker ${REGION}-docker.pkg.dev
 ```
 
----
-
 ## Step 2 — Push a large test image
 
 Pull PyTorch from Docker Hub (~6 GB) and push to AR:
@@ -79,8 +63,6 @@ docker tag pytorch/pytorch:2.3.0-cuda12.1-cudnn8-runtime \
   ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/pytorch-test:latest
 docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/pytorch-test:latest
 ```
-
----
 
 ## Step 3 — Create a cluster without streaming (baseline)
 
@@ -96,8 +78,6 @@ gcloud container clusters get-credentials $CLUSTER_NAME --zone $ZONE
 ```
 
 No `--enable-image-streaming`. This is the baseline.
-
----
 
 ## Step 4 — Measure baseline startup time
 
@@ -118,8 +98,6 @@ kubectl describe pod -l app=test-no-streaming | grep -A3 "Pulling\|Pulled"
 ```bash
 kubectl delete -f manifests/test-pods-no-streaming.yaml
 ```
-
----
 
 ## Step 5 — Enable streaming on the node pool
 
@@ -143,8 +121,6 @@ kubectl get nodes \
   -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.labels.cloud\.google\.com/gke-image-streaming}{"\n"}{end}'
 ```
 
----
-
 ## Step 6 — Measure startup time with streaming
 
 ```bash
@@ -161,16 +137,12 @@ kubectl describe pod -l app=test-streaming | grep -A3 "Pulling\|Pulled\|Started"
 
 With streaming, `Pulled image` appears within seconds — metadata registered, not full download.
 
----
-
 ## Step 7 — Compare the results
 
 | Mode | Image pull time | Container start |
 |------|----------------|-----------------|
 | No streaming | Full download (~minutes) | After pull completes |
 | Streaming | Near instant | During pull |
-
----
 
 ## Step 8 — Test on a cold node
 
@@ -197,8 +169,6 @@ kubectl run cold-test \
 time kubectl wait --for=condition=Ready pod cold-test --timeout=300s
 ```
 
----
-
 ## Step 9 — Clean up
 
 ```bash
@@ -207,8 +177,6 @@ kubectl delete pod cold-test --ignore-not-found
 gcloud container clusters delete $CLUSTER_NAME --zone $ZONE --quiet
 gcloud artifacts repositories delete $REPO --location=$REGION --quiet
 ```
-
----
 
 ## When streaming helps
 
