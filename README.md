@@ -91,10 +91,13 @@ gcloud container clusters create $CLUSTER_NAME \
   --zone $ZONE \
   --num-nodes 2 \
   --machine-type e2-standard-4 \
+  --disk-size=50 \
+  --disk-type=pd-standard \
   --image-type COS_CONTAINERD \
   --release-channel regular
 
 gcloud container clusters get-credentials $CLUSTER_NAME --zone $ZONE
+kubectl get nodes
 ```
 
 No `--enable-image-streaming`. This is the baseline.
