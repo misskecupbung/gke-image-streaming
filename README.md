@@ -49,19 +49,25 @@ gcloud artifacts repositories create $REPO \
   --repository-format=docker \
   --location=$REGION \
   --description="Lab: image streaming"
+gcloud artifacts repositories list
 
 gcloud auth configure-docker ${REGION}-docker.pkg.dev
 ```
 
 ## Step 2 — Push a large test image
 
-Pull PyTorch from Docker Hub (~6 GB) and push to AR:
+Pull PyTorch from Docker Hub (~6 GB) and push to AR. Cloud Shell has a 5 GB home directory, so use Cloud Build to avoid running out of space. The config is already in `manifests/cloudbuild-push-image.yaml`:
 
 ```bash
-docker pull pytorch/pytorch:2.3.0-cuda12.1-cudnn8-runtime
-docker tag pytorch/pytorch:2.3.0-cuda12.1-cudnn8-runtime \
-  ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/pytorch-test:latest
-docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/pytorch-test:latest
+gcloud builds submit --no-source \
+  --substitutions=_REGION=${REGION},_PROJECT_ID=${PROJECT_ID},_REPO=${REPO} \
+  --config manifests/cloudbuild-push-image.yaml
+```
+
+Then update the `image` field in both manifest files — replace `REPLACE_WITH_YOUR_AR_IMAGE` with:
+
+```
+${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/pytorch-test:latest
 ```
 
 ## Step 3 — Create a cluster without streaming (baseline)

@@ -1,0 +1,10 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['pull', 'pytorch/pytorch:2.3.0-cuda12.1-cudnn8-runtime']
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+  - tag
+  - pytorch/pytorch:2.3.0-cuda12.1-cudnn8-runtime
+  - ${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO}/pytorch-test:latest
+images:
+- ${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO}/pytorch-test:latest
